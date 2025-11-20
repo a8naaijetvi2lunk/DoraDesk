@@ -325,47 +325,126 @@ class DoraDeskApp {
     }
 
     /**
+     * Retourne la description d'un widget
+     * @param {string} widgetId - ID du widget
+     * @returns {string} Description du widget
+     */
+    getWidgetDescription(widgetId) {
+        const descriptions = {
+            'bookmarks': 'Gérez vos sites favoris organisés par catégories',
+            'tasks': 'Liste de tâches avec priorités et suivi',
+            'notes': 'Bloc-notes avec sauvegarde automatique',
+            'tools-px': 'Convertisseur PX ↔ REM pour le développement',
+            'tools-pass': 'Générateur de mots de passe sécurisés',
+            'snippets': 'Bibliothèque de snippets de code réutilisables',
+            'calculator': 'Calculatrice avec opérations basiques',
+            'pomodoro': 'Timer Pomodoro pour gérer votre temps',
+            'git-cheatsheet': 'Commandes Git essentielles à portée de main',
+            'emoji-picker': 'Sélecteur d\'emojis avec historique',
+            'rss-feeds': 'Flux RSS personnalisés et actualisés',
+            'statistics': 'Dashboard de statistiques et tracking'
+        };
+        return descriptions[widgetId] || 'Widget pour votre dashboard';
+    }
+
+    /**
      * Ouvre le gestionnaire de cartes/widgets
      */
     openCardManager() {
         const activeWidgets = this.gridManager.getActiveWidgets();
         const allWidgets = WidgetRegistry.getAll();
+        const activeCount = activeWidgets.length;
+        const totalCount = allWidgets.length;
 
         let html = `
-            <div class="space-y-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold">Gérer les widgets</h2>
+            <div class="w-full max-w-4xl">
+                <!-- Header avec stats -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                    <div class="flex-1">
+                        <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+                            <i class="mdi mdi-view-grid-plus text-accent text-xl sm:text-2xl"></i>
+                            <span>Gérer les Widgets</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-zinc-500 mt-1">
+                            ${activeCount} widget${activeCount > 1 ? 's' : ''} actif${activeCount > 1 ? 's' : ''} sur ${totalCount}
+                        </p>
+                    </div>
                     <button
                         onclick="window.modalManager.closeAll()"
-                        class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                        class="p-2 hover:bg-white/10 rounded-lg transition-colors text-zinc-400 hover:text-white self-start sm:self-auto">
                         <i class="mdi mdi-close text-xl"></i>
                     </button>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-        `;
+                <!-- Grid de widgets avec catégories -->
+                <div class="space-y-3 sm:space-y-4 max-h-[50vh] sm:max-h-[55vh] overflow-y-auto pr-1 custom-scrollbar">
+                    <!-- Widgets Actifs -->
+                    ${activeCount > 0 ? `
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2 sticky top-0 bg-dark-800/90 backdrop-blur-sm py-2 z-10">
+                                <i class="mdi mdi-check-circle text-accent"></i>
+                                <span>Actifs</span>
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                                ${allWidgets.filter(w => activeWidgets.includes(w.id)).map(widget => `
+                                    <button
+                                        onclick="app.removeWidget('${widget.id}'); window.modalManager.closeAll();"
+                                        class="group relative bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/30 p-3 sm:p-4 rounded-xl transition-all hover:border-accent hover:shadow-lg hover:shadow-accent/20 active:scale-95 text-left flex items-start gap-2 sm:gap-3">
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-accent/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                            <i class="mdi mdi-${widget.icon} text-xl sm:text-2xl text-accent"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0 pr-6 sm:pr-0">
+                                            <div class="font-semibold text-sm sm:text-base text-white mb-0.5 sm:mb-1">${widget.name}</div>
+                                            <div class="text-xs text-zinc-400 line-clamp-2">${this.getWidgetDescription(widget.id)}</div>
+                                        </div>
+                                        <div class="absolute top-2 right-2 sm:top-3 sm:right-3 w-6 h-6 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i class="mdi mdi-close text-sm"></i>
+                                        </div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
 
-        allWidgets.forEach(widget => {
-            const isActive = activeWidgets.includes(widget.id);
-            const buttonClass = isActive
-                ? 'bg-accent text-white'
-                : 'bg-white/5 hover:bg-white/10';
+                    <!-- Widgets Disponibles -->
+                    ${allWidgets.filter(w => !activeWidgets.includes(w.id)).length > 0 ? `
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2 sticky top-0 bg-dark-800/90 backdrop-blur-sm py-2 z-10">
+                                <i class="mdi mdi-plus-circle"></i>
+                                <span>Disponibles</span>
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                                ${allWidgets.filter(w => !activeWidgets.includes(w.id)).map(widget => `
+                                    <button
+                                        onclick="app.addWidget('${widget.id}'); window.modalManager.closeAll();"
+                                        class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 p-3 sm:p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-95 text-left flex items-start gap-2 sm:gap-3">
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors">
+                                            <i class="mdi mdi-${widget.icon} text-xl sm:text-2xl text-zinc-400 group-hover:text-accent transition-colors"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-semibold text-sm sm:text-base text-white mb-0.5 sm:mb-1 group-hover:text-accent transition-colors">${widget.name}</div>
+                                            <div class="text-xs text-zinc-500 line-clamp-2">${this.getWidgetDescription(widget.id)}</div>
+                                        </div>
+                                        <div class="w-6 h-6 bg-accent/20 text-accent rounded-full flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                            <i class="mdi mdi-plus text-sm"></i>
+                                        </div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
 
-            html += `
-                <button
-                    onclick="${isActive ? `app.removeWidget('${widget.id}')` : `app.addWidget('${widget.id}')`}; window.modalManager.closeAll();"
-                    class="${buttonClass} p-4 rounded-lg transition-all text-left flex items-start gap-3">
-                    <i class="mdi mdi-${widget.icon} text-2xl flex-shrink-0 mt-1"></i>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-semibold">${widget.name}</div>
-                        <div class="text-xs opacity-70 mt-1">${widget.description || ''}</div>
+                <!-- Footer -->
+                <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10 flex flex-col-reverse sm:flex-row justify-between items-center gap-3">
+                    <div class="text-xs text-zinc-500 hidden sm:block">
+                        <i class="mdi mdi-gesture-tap"></i> Cliquez pour ajouter/retirer
                     </div>
-                    <i class="mdi mdi-${isActive ? 'check' : 'plus'} text-xl flex-shrink-0"></i>
-                </button>
-            `;
-        });
-
-        html += `
+                    <button
+                        onclick="window.modalManager.closeAll()"
+                        class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-accent hover:brightness-110 rounded-lg text-white font-medium transition-all">
+                        <i class="mdi mdi-check"></i> Terminé
+                    </button>
                 </div>
             </div>
         `;
