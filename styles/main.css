@@ -1,0 +1,60 @@
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-color, #6366f1); }
+
+/* GridStack Overrides */
+.grid-stack { background: transparent; }
+.grid-stack-item-content {
+    border-radius: 1rem;
+    overflow: hidden !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Glassmorphism base */
+.glass-panel {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dynamic Accent Color */
+:root { --accent-color: #6366f1; }
+.text-accent { color: var(--accent-color); }
+.bg-accent { background-color: var(--accent-color); }
+.border-accent { border-color: var(--accent-color); }
+.hover\:bg-accent:hover { background-color: var(--accent-color); }
+.focus\:border-accent:focus { border-color: var(--accent-color); }
+.focus\:ring-accent:focus { --tw-ring-color: var(--accent-color); }
+
+/* Handles & Animations */
+.ui-resizable-handle { opacity: 0; transition: opacity 0.2s; }
+.grid-stack-item:hover .ui-resizable-handle { opacity: 1; }
+
+/* Toast Animations */
+.toast-enter { transform: translateY(100%); opacity: 0; }
+.toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Icon buttons */
+.icon-btn {
+    padding: 0.25rem;
+    transition: all 0.2s;
+    color: #a1a1aa;
+}
+.icon-btn:hover {
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Widget close button - hidden by default, shown in edit mode */
+.widget-close-btn {
+    transition: all 0.2s;
+}
+
+/* Custom scrollbar for widget content */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
